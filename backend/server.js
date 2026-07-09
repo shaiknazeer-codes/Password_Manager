@@ -32,13 +32,29 @@ app.get('/', async (req, res) => {
 })
 
 // Save a password
-app.post('/', async (req, res) => { 
-    const password = req.body
+// app.post('/', async (req, res) => { 
+//     const password = req.body
+//     const db = client.db(dbName);
+//     const collection = db.collection('passwords');
+//     const findResult = await collection.insertOne(password);
+//     res.send({success: true, result: findResult})
+// })
+
+
+app.post('/', async (req, res) => {
+    console.log("POST received:", req.body);
+
+    const password = req.body;
     const db = client.db(dbName);
     const collection = db.collection('passwords');
-    const findResult = await collection.insertOne(password);
-    res.send({success: true, result: findResult})
-})
+
+    const result = await collection.insertOne(password);
+
+    console.log("Inserted:", result);
+
+    res.send({ success: true, result });
+});
+
 
 // Delete a password by id
 app.delete('/', async (req, res) => { 
