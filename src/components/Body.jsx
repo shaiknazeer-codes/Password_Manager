@@ -36,11 +36,17 @@ const body = () => {
         
         if (form.site.length > 3 && form.username.length > 3 && form.password.length > 3) {
 
-            // If any such id exists in the db, delete it 
-            await fetch("http://localhost:3000/", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: form.id }) })
+            // Only delete the old backend entry if we're editing an existing one
+            if (form.id) {
+                await fetch("http://localhost:3000/", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: form.id }) })
+            }
 
-            setPasswordArray([...passwordArray, { ...form, id: uuidv4() }])
-            await fetch("http://localhost:3000/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, id: uuidv4() }) })
+            // Use ONE id for both local state and backend, so they always match
+            const newEntry = { ...form, id: form.id || uuidv4() }
+
+            // Functional update so we always append to the latest state, never a stale snapshot
+            setPasswordArray(prev => [...prev, newEntry])
+            await fetch("http://localhost:3000/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newEntry) })
 
             
             setform({ site: "", username: "", password: "" })
@@ -80,7 +86,7 @@ const body = () => {
         console.log("Deleting password with id ", id)
         let c = confirm("Do you really want to delete this password?")
         if (c) {
-            setPasswordArray(passwordArray.filter(item => item.id !== id))
+            setPasswordArray(prev => prev.filter(item => item.id !== id))
 
             await fetch("http://localhost:3000/", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
 
@@ -99,7 +105,7 @@ const body = () => {
     }
     const editPassword = (id) => {
         setform({ ...passwordArray.filter(i => i.id === id)[0], id: id })
-        setPasswordArray(passwordArray.filter(item => item.id !== id))
+        setPasswordArray(prev => prev.filter(item => item.id !== id))
     }
 
     const handleChange = (e) => {
@@ -109,22 +115,24 @@ const body = () => {
     return (
         <>
             <ToastContainer />
-            <div className="absolute inset-0 -z-10 h-full w-full bg-blue-50 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"><div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-blue-400 opacity-20 blur-[100px]"></div></div>
-            <div></div>
-            <div className="logo font-bold text-black text-3xl my-10 text-center">
+            <div className=" md:mycontainer min-h-[88.2vh] absolute inset-0 -z-10 h-full w-full bg-blue-50 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"><div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-blue-400 opacity-20 blur-[100px]"></div></div>
+            
+            <div className="logo font-bold text-black text-2xl md:text-3xl my-10 text-center">
                 <span className='text-blue-400'> &lt;</span>
                 <span>Pass</span><span className='text-blue-400'>OP/&gt;</span>
 
             </div>
-            <h2 className=' text-center -my-8 mx-8'>Your own password manager</h2>
+            <h2 className=' text-center -my-8 mx-4 md:mx-8'>Your own password manager</h2>
             <div >
-                <input value={form.site} onChange={handleChange} name="site" id="site" className='my-10 rounded-full border border-blue-500 w-[70%] mx-[17%] p-4 py-1' type="text" placeholder='Enter webiste URL' />
-                <div className='flex gap-8 mx-[17%]'>
+                <input value={form.site} onChange={handleChange} name="site" id="site" className='my-10 rounded-full border border-blue-500 w-[90%] mx-[5%] md:w-[70%] md:mx-[17%] p-4 py-1' type="text" placeholder='Enter webiste URL' />
+                <div className='flex flex-col md:flex-row gap-4 md:gap-8 mx-[5%] md:mx-[17%]'>
                     <input value={form.username} name="username" id="username" onChange={handleChange} className=' rounded-full border border-blue-500 w-full p-4 py-1' type="text" placeholder='Enter username' />
-                    <input value={form.password} ref={passwordRef} onChange={handleChange} className=' rounded-full gap-6 border border-blue-500 w-[25%]  p-4 py-1' type="password" name="password" id="password" placeholder='Enter password' />
-                    <span className=' w-10 width={26} invert -mx-18 my-1.5' onClick={showPassword}>
-                        <img ref={ref} src="/eye.svg" alt="eye" />
-                    </span>
+                    <div className='flex items-center gap-2 w-full md:w-[25%]'>
+                        <input value={form.password} ref={passwordRef} onChange={handleChange} className=' rounded-full gap-6 border border-blue-500 w-full p-4 py-1' type="password" name="password" id="password" placeholder='Enter password' />
+                        <span className=' w-10 invert my-1.5 -mx-10' onClick={showPassword}>
+                            <img ref={ref} src="/eye.svg" alt="eye" />
+                        </span>
+                    </div>
                 </div>
                 <div>
 
@@ -143,8 +151,9 @@ const body = () => {
                     </button>
                 </div>
                 <div>
-                    <h2 className='font-bold text-2xl py-2 mx-[17%]'>Your Passwords</h2>
-                    <table className="table-auto w-[65%] mx-auto rounded-md overflow-hidden mb-10">
+                    <h2 className='font-bold text-2xl py-2 mx-[5%] md:mx-[17%]'>Your Passwords</h2>
+                    <div className='w-[95%] md:w-[65%] mx-auto overflow-x-auto'>
+                    <table className="table-auto w-full rounded-md overflow-hidden mb-10">
                         <thead className='bg-blue-800 text-white'>
                             <tr>
                                 <th className='py-2'>Site</th>
@@ -213,6 +222,7 @@ const body = () => {
                             })}
                         </tbody>
                     </table>
+                    </div>
 
 
                 </div>
