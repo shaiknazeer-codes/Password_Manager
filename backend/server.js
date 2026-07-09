@@ -23,11 +23,12 @@ app.use(bodyparser.json())
 // app.use(cors())
 app.use(cors({
   origin: "https://password-manager-pypa.vercel.app",
-  methods: ["GET", "POST", "DELETE"],
-  allowedHeaders: ["Content-Type"]
+  credentials: true
 }));
 
-app.options("/", cors());
+app.options("*", cors());
+
+
 
 // Get all the passwords
 app.get('/', async (req, res) => {
