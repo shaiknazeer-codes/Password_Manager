@@ -12,7 +12,7 @@ const body = () => {
     const [passwordArray, setPasswordArray] = useState([])
 
     const getPasswords = async () => {
-        let req = await fetch("https://password-manager-miig.onrender.com")
+        let req = await fetch("http://localhost:3000/")
         let passwords = await req.json()
         setPasswordArray(passwords)
     }
@@ -33,36 +33,33 @@ const body = () => {
     };
 
     const savePassword = async () => {
+        
+        if (form.site.length > 3 && form.username.length > 3 && form.password.length > 3) {
 
-    if (form.site.length > 3 && form.username.length > 3 && form.password.length > 3) {
+            // If any such id exists in the db, delete it 
+            await fetch("http://localhost:3000/", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: form.id }) })
 
-        // Delete only while editing
-        if (form.id) {
-            await fetch("https://password-manager-miig.onrender.com", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: form.id })
-            })
+            setPasswordArray([...passwordArray, { ...form, id: uuidv4() }])
+            await fetch("http://localhost:3000/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, id: uuidv4() }) })
+
+            
+            setform({ site: "", username: "", password: "" })
+            toast('Password saved!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+        else {
+            toast('Error: Password not saved!');
         }
 
-        const newPassword = { ...form, id: uuidv4() }
-
-        setPasswordArray([...passwordArray, newPassword])
-
-        await fetch("https://password-manager-miig.onrender.com", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newPassword)
-        })
-
-        setform({ site: "", username: "", password: "" })
-
-        toast.success("Password saved!")
     }
-    else {
-        toast("Error: Password not saved!")
-    }
-}
 
     const copyText = (text) => {
         toast.success("Copied to Clipboard", {
@@ -85,7 +82,7 @@ const body = () => {
         if (c) {
             setPasswordArray(passwordArray.filter(item => item.id !== id))
 
-            await fetch("https://password-manager-miig.onrender.com", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
+            await fetch("http://localhost:3000/", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
 
             toast.success('Password Deleted!', {
                 position: "top-right",

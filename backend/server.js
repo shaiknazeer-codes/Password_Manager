@@ -15,19 +15,11 @@ client.connect();
 // App & Database
 const dbName = process.env.DB_NAME 
 const app = express()
-// const port = 3000 
-const port = process.env.PORT || 3000;
+const port = 3000 
 
 // Middleware
 app.use(bodyparser.json())
-// app.use(cors())
-app.use(cors({
-  origin: "https://password-manager-pypa.vercel.app",
-  credentials: true
-}));
-
-app.options("*", cors());
-
+app.use(cors())
 
 
 // Get all the passwords
@@ -39,29 +31,13 @@ app.get('/', async (req, res) => {
 })
 
 // Save a password
-// app.post('/', async (req, res) => { 
-//     const password = req.body
-//     const db = client.db(dbName);
-//     const collection = db.collection('passwords');
-//     const findResult = await collection.insertOne(password);
-//     res.send({success: true, result: findResult})
-// })
-
-
-app.post('/', async (req, res) => {
-    console.log("POST received:", req.body);
-
-    const password = req.body;
+app.post('/', async (req, res) => { 
+    const password = req.body
     const db = client.db(dbName);
     const collection = db.collection('passwords');
-
-    const result = await collection.insertOne(password);
-
-    console.log("Inserted:", result);
-
-    res.send({ success: true, result });
-});
-
+    const findResult = await collection.insertOne(password);
+    res.send({success: true, result: findResult})
+})
 
 // Delete a password by id
 app.delete('/', async (req, res) => { 
