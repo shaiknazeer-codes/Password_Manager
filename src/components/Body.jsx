@@ -12,7 +12,7 @@ const body = () => {
     const [passwordArray, setPasswordArray] = useState([])
 
     const getPasswords = async () => {
-        let req = await fetch("https://password-manager-miig.onrender.com/")
+        let req = await fetch("https://password-manager-miig.onrender.com")
         let passwords = await req.json()
         setPasswordArray(passwords)
     }
@@ -38,7 +38,7 @@ const body = () => {
 
         // Delete only while editing
         if (form.id) {
-            await fetch("https://password-manager-miig.onrender.com/", {
+            await fetch("https://password-manager-miig.onrender.com", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id: form.id })
@@ -49,7 +49,7 @@ const body = () => {
 
         setPasswordArray([...passwordArray, newPassword])
 
-        await fetch("https://password-manager-miig.onrender.com/", {
+        await fetch("https://password-manager-miig.onrender.com", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newPassword)
@@ -85,7 +85,7 @@ const body = () => {
         if (c) {
             setPasswordArray(passwordArray.filter(item => item.id !== id))
 
-            await fetch("https://password-manager-miig.onrender.com/", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
+            await fetch("https://password-manager-miig.onrender.com", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
 
             toast.success('Password Deleted!', {
                 position: "top-right",
