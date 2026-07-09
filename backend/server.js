@@ -27,6 +27,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type"]
 }));
 
+app.options("*", cors());
 
 // Get all the passwords
 app.get('/', async (req, res) => {
